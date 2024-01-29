@@ -1,0 +1,68 @@
+CREATE DATABASE RAHUL2024 ;
+USE DATABASE RAHUL2024;
+
+CREATE OR REPLACE TABLE "SALES_DATA_RPG_REPLICA" ("order_id" VARCHAR(30),
+                                         "order_date" VARCHAR(30),
+                                         "ship_date" VARCHAR(30),
+                                         "ship_mode" VARCHAR(100),
+                                         "customer_name" VARCHAR(100),
+                                         "segment" VARCHAR(100),
+                                         "state" VARCHAR(100),
+                                         "country" VARCHAR(100),
+                                         "market" VARCHAR(100), 
+                                         "region" VARCHAR(100),
+                                         "product_id" VARCHAR(100),
+                                         "category" VARCHAR(100),
+                                         "sub_category" VARCHAR(100),
+                                         "product_name" VARCHAR(300),
+                                         "sales" NUMBER,
+                                         "quantity" NUMBER,
+                                         "discount" NUMBER,
+                                         "profit" FLOAT,
+                                         "shipping_cost"  FLOAT,
+                                         "order_priority" VARCHAR(100),
+                                         "year" VARCHAR(30)
+                                        );
+DESCRIBE TABLE SALES_DATA_RPG_REPLICA ;
+
+SELECT * FROM SALES_DATA_RPG_REPLICA ;
+
+ALTER TABLE SALES_DATA_RPG_REPLICA ADD PRIMARY KEY ("order_id") ; 
+
+SELECT SUBSTR ("order_id",9,15 ) AS EXTRACT FROM SALES_DATA_RPG_REPLICA ;    -----------> 3) EXTRACTED THE LAST NUMBER AFTER "-" ORDER_ID 
+ALTER TABLE SALES_DATA_RPG_REPLICA ADD COLUMN ORDER_TYPE_NO VARCHAR(10) ;
+UPDATE SALES_DATA_RPG_REPLICA SET ORDER_TYPE_NO = SUBSTR ("order_id",9,15 ) ;
+
+SELECT * FROM SALES_DATA_RPG_REPLICA ;
+
+ALTER TABLE SALES_DATA_RPG_REPLICA ADD COLUMN DISCOUNT_CASE VARCHAR(10);
+UPDATE  SALES_DATA_RPG_REPLICA SET DISCOUNT_CASE = CASE WHEN 'discount' >'0' THEN 'YES' ELSE 'FALSE' END ; 
+SELECT * FROM SALES_DATA_RPG_REPLICA ; 
+
+SELECT DISCOUNT_CASE FROM SALES_DATA_RPG_REPLICA WHERE  DISCOUNT_CASE = 'FALSE' ;
+
+SELECT SUM ("profit") FROM  SALES_DATA_RPG_REPLICA ;      -------> 5) 
+
+
+SELECT DATEDIFF(DAY, "order_date", "ship_date") AS DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT FROM SALES_DATA_RPG_REPLICA ; -------> 6)
+ALTER TABLE SALES_DATA_RPG_REPLICA ADD COLUMN DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT NUMBER(10,0); 
+UPDATE SALES_DATA_RPG_REPLICA SET DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT = DATEDIFF(DAY, "order_date", "ship_date") ; 
+SELECT * FROM SALES_DATA_RPG_REPLICA ; 
+
+
+
+ALTER TABLE SALES_DATA_RPG_REPLICA ADD COLUMN PROCESS_DAY_RATING NUMBER(10,0);   ---------> 7)
+UPDATE SALES_DATA_RPG_REPLICA 
+SET PROCESS_DAY_RATING = 
+                         CASE WHEN DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT <= '3' THEN '5'
+                              WHEN DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT <= '6' AND 
+                                   DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT > '3' THEN '4'     
+                              WHEN DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT < '10' AND 
+                                   DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT > '6' THEN '3'      
+                              WHEN DAYS_FOR_EACH_ORDER_TO_PROCESS_FOR_SHIPMENT > '10' THEN '2'   END ; 
+
+SELECT * FROM SALES_DATA_RPG_REPLICA ; 
+
+
+
+
